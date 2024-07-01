@@ -188,7 +188,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         response = requests.post(url, json=payload, headers=headers)
         response_data = response.json()
 
-        if response_data.get("authenticated"):
+        if response_data.get("message") == "Authentication successful":
             self.message_label.setText("Login successful")
             self.message_label.setStyleSheet("font-size: 14px; color: green;")
         else:
