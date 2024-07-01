@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 import requests
 import gui_setup
 
+
 class LoginWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -209,7 +210,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         response = requests.post(url, json=payload, headers=headers)
         response_data = response.json()
 
-        if response_data.get("created"):
+        if response_data.get("message") == "User created successfully":
             self.message_label.setText("Account created successfully")
             self.message_label.setStyleSheet("font-size: 14px; color: green;")
         else:
