@@ -3,7 +3,6 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 import requests
 import gui_setup
 
-
 class LoginWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
@@ -192,9 +191,33 @@ class LoginWindow(QtWidgets.QMainWindow):
         if response_data.get("message") == "Authentication successful":
             self.message_label.setText("Login successful")
             self.message_label.setStyleSheet("font-size: 14px; color: green;")
+            QtCore.QTimer.singleShot(2000, self.show_loading_screen)
         else:
             self.message_label.setText("Incorrect username or password")
             self.message_label.setStyleSheet("font-size: 14px; color: red;")
+
+    def show_loading_screen(self):
+        loading_screen = LoadingScreen()
+        loading_screen.show()
+        QtCore.QTimer.singleShot(5000, lambda: self.load_main_window(loading_screen))
+
+    def load_main_window(self, loading_screen):
+        loading_screen.close()
+        self.clear_window()
+        self.showMaximized()
+
+    def clear_window(self):
+        # Clear existing layout
+        central_widget = QtWidgets.QWidget(self)
+        self.setCentralWidget(central_widget)
+
+        main_layout = QtWidgets.QVBoxLayout(central_widget)
+
+        # Add new content here for the main application window after successful login
+        self.label_title = QtWidgets.QLabel("Main Application Window", self)
+        self.label_title.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_title.setStyleSheet("font-size: 20px; font-weight: bold;")
+        main_layout.addWidget(self.label_title)
 
     def create_account(self):
         username = self.username.text()
@@ -210,7 +233,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         response = requests.post(url, json=payload, headers=headers)
         response_data = response.json()
 
-        if response_data.get("message") == "User created successfully":
+        if response_data.get("created"):
             self.message_label.setText("Account created successfully")
             self.message_label.setStyleSheet("font-size: 14px; color: green;")
         else:
@@ -226,13 +249,36 @@ class LoginWindow(QtWidgets.QMainWindow):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
+class LoadingScreen(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Loading...")
+        self.setGeometry(100, 100, 400, 250)  # Set appropriate size for loading screen
+        self.center()
+
+        layout = QtWidgets.QVBoxLayout(self)
+        self.label = QtWidgets.QLabel("Loading, please wait...", self)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.setStyleSheet("font-size: 16px;")
+        layout.addWidget(self.label)
+
+        # Center the loading screen
+        self.center()
+
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = QtWidgets.QApplication.desktop().screenNumber(
+            QtWidgets.QApplication.desktop().cursor().pos()
+        )
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
     window = LoginWindow()
     window.show()
     sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
     main()
