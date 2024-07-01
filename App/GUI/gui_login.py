@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 import requests
-import json
+
 
 class LoginWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -134,35 +134,39 @@ class LoginWindow(QtWidgets.QMainWindow):
         # Reset form for account creation
         self.create_account_form()
 
+        # Add create_account_button back to the layout
+        main_layout = self.centralWidget().layout()
+        main_layout.addWidget(self.create_account_button)
+
     def create_account_form(self):
         main_layout = self.centralWidget().layout()
 
         # Adjust title for account creation
         self.label_title.setText("Create an Account")
 
-        # Clear login button and add create account button
-        main_layout.removeWidget(self.login_button)
-        self.login_button.deleteLater()
+        # Clear login button if exists
+        if self.login_button:
+            main_layout.removeWidget(self.login_button)
+            self.login_button.deleteLater()
 
-        self.create_account_button.setText("Create Account")
-        self.create_account_button.clicked.disconnect(self.switch_to_create_account)
+        # Create and add create_account_button
+        self.create_account_button = QtWidgets.QPushButton("Create Account", self)
+        self.create_account_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: #008CBA;
+                color: white;
+                font-size: 14px;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #005F6B;
+            }
+        """
+        )
         self.create_account_button.clicked.connect(self.create_account)
-
-        # Add fields for account creation (e.g., email, confirm password, etc.)
-        self.email_label = QtWidgets.QLabel("Email:", self)
-        self.email_label.setStyleSheet("font-size: 14px;")
-        self.email = QtWidgets.QLineEdit(self)
-        self.email.setPlaceholderText("Enter your email")
-        self.email.setStyleSheet("padding: 5px; font-size: 14px;")
-        self.form_layout.addRow(self.email_label, self.email)
-
-        self.confirm_password_label = QtWidgets.QLabel("Confirm Password:", self)
-        self.confirm_password_label.setStyleSheet("font-size: 14px;")
-        self.confirm_password = QtWidgets.QLineEdit(self)
-        self.confirm_password.setPlaceholderText("Confirm your password")
-        self.confirm_password.setEchoMode(QtWidgets.QLineEdit.Password)
-        self.confirm_password.setStyleSheet("padding: 5px; font-size: 14px;")
-        self.form_layout.addRow(self.confirm_password_label, self.confirm_password)
+        main_layout.addWidget(self.create_account_button)
 
     def toggle_password_visibility(self):
         if self.show_password_button.isChecked():
@@ -178,7 +182,7 @@ class LoginWindow(QtWidgets.QMainWindow):
 
         # Implement your login logic here
         # Example code to send login request to a server
-        url = "http://your-server/authenticate_user"
+        url = "http://25.15.71.9:5000/authenticate_user"
         payload = {"username": username, "password": password}
         headers = {"Content-Type": "application/json"}
         response = requests.post(url, json=payload, headers=headers)
@@ -194,17 +198,12 @@ class LoginWindow(QtWidgets.QMainWindow):
     def create_account(self):
         username = self.username.text()
         password = self.password.text()
-        email = self.email.text()
-        confirm_password = self.confirm_password.text()
-
         # Implement your account creation logic here
         # Example code to send account creation request to a server
-        url = "http://your-server/create_user"
+        url = "http://25.15.71.9:5000/create_user"
         payload = {
             "username": username,
             "password": password,
-            "email": email,
-            "confirm_password": confirm_password,
         }
         headers = {"Content-Type": "application/json"}
         response = requests.post(url, json=payload, headers=headers)
@@ -216,7 +215,6 @@ class LoginWindow(QtWidgets.QMainWindow):
         else:
             self.message_label.setText("Failed to create account")
             self.message_label.setStyleSheet("font-size: 14px; color: red;")
-
 
     def center(self):
         frameGm = self.frameGeometry()

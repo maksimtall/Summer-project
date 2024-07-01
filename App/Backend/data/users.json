@@ -3,5 +3,10 @@
         "id": "user_1",
         "username": "user1",
         "password": "password123"
+    },
+    {
+        "id": "user_2",
+        "username": "test123",
+        "password": "test1"
     }
 ]
