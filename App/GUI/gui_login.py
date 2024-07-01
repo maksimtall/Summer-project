@@ -2,6 +2,7 @@ import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 import gui_setup  # Assuming gui_setup provides image1_path and image2_path
 import requests
+import json
 
 
 class LoginWindow(QtWidgets.QMainWindow):
@@ -163,6 +164,12 @@ class LoginWindow(QtWidgets.QMainWindow):
         payload = {"username": username, "password": password}
         headers = {"Content-Type": "application/json"}
         response = requests.request("POST", url, json=payload, headers=headers)
+        login_status = json.loads(response.text)
+        login_status = login_status.get("message")
+        if login_status == "Authentication successful":
+            self.message_label.setText("Login successful")
+        else:
+            self.message_label.setText("Incorrect username or password")
 
 
 def main():
