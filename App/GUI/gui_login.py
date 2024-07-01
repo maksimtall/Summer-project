@@ -159,7 +159,7 @@ class LoginWindow(QtWidgets.QMainWindow):
     def check_login(self):
         username = self.username.text()
         password = self.password.text()
-        url = "http://127.0.0.1:5000/authenticate_user"
+        url = "http://25.15.71.9:5000/authenticate_user"
         payload = {"username": username, "password": password}
         headers = {"Content-Type": "application/json"}
         response = requests.request("POST", url, json=payload, headers=headers)
