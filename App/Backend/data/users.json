@@ -18,5 +18,10 @@
         "id": "user_4",
         "username": "user5476",
         "password": "password64578"
+    },
+    {
+        "id": "user_5",
+        "username": "ADMIN#1_Maki",
+        "password": "maki1234"
     }
 ]
