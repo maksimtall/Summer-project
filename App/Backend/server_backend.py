@@ -164,4 +164,4 @@ def get_user_tables(user_id):
 
 # Run the Flask application
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
