@@ -1,7 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
 import requests
-
+import gui_setup
 
 class LoginWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -54,7 +54,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         self.show_password_button = QtWidgets.QPushButton(self)
         self.show_password_button.setCheckable(True)
         self.show_password_button.setFixedSize(30, 30)
-        self.show_password_button.setIcon(QtGui.QIcon("show_password.png"))
+        self.show_password_button.setIcon(QtGui.QIcon(gui_setup.image1_path))
         self.show_password_button.setStyleSheet(
             """
             QPushButton {
@@ -171,10 +171,10 @@ class LoginWindow(QtWidgets.QMainWindow):
     def toggle_password_visibility(self):
         if self.show_password_button.isChecked():
             self.password.setEchoMode(QtWidgets.QLineEdit.Normal)
-            self.show_password_button.setIcon(QtGui.QIcon("hide_password.png"))
+            self.show_password_button.setIcon(QtGui.QIcon(gui_setup.image2_path))
         else:
             self.password.setEchoMode(QtWidgets.QLineEdit.Password)
-            self.show_password_button.setIcon(QtGui.QIcon("show_password.png"))
+            self.show_password_button.setIcon(QtGui.QIcon(gui_setup.image1_path))
 
     def check_login(self):
         username = self.username.text()
