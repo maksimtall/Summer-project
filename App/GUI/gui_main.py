@@ -197,12 +197,12 @@ class LoginWindow(QtWidgets.QMainWindow):
             self.message_label.setStyleSheet("font-size: 14px; color: red;")
 
     def show_loading_screen(self):
-        loading_screen = LoadingScreen()
-        loading_screen.show()
-        QtCore.QTimer.singleShot(5000, lambda: self.load_main_window(loading_screen))
+        self.loading_screen = LoadingScreen()
+        self.loading_screen.show()
+        QtCore.QTimer.singleShot(5000, self.load_main_window)
 
-    def load_main_window(self, loading_screen):
-        loading_screen.close()
+    def load_main_window(self):
+        self.loading_screen.close()
         self.clear_window()
         self.showMaximized()
 
@@ -257,13 +257,25 @@ class LoadingScreen(QtWidgets.QWidget):
         self.center()
 
         layout = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel("Loading, please wait...", self)
+        self.label = QtWidgets.QLabel("Loading, please wait.", self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setStyleSheet("font-size: 16px;")
         layout.addWidget(self.label)
 
+        self.dots = ""
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_loading_text)
+        self.timer.start(100)
+
         # Center the loading screen
         self.center()
+
+    def update_loading_text(self):
+        if self.dots == "...":
+            self.dots = ""
+        else:
+            self.dots += "."
+        self.label.setText(f"Loading, please wait{self.dots}")
 
     def center(self):
         frameGm = self.frameGeometry()
