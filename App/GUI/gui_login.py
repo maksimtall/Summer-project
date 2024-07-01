@@ -1,9 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore
-import gui_setup  # Assuming gui_setup provides image1_path and image2_path
 import requests
 import json
-
 
 class LoginWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -12,14 +10,12 @@ class LoginWindow(QtWidgets.QMainWindow):
 
     def initUI(self):
         self.setWindowTitle("Summer Project")
-        self.setGeometry(
-            100, 100, 400, 250
-        )  # Increased height to accommodate the "Show Password" button
-
-        # Center the window
+        self.setGeometry(100, 100, 400, 250)  # Initial window size
         self.center()
 
-        # Central widget and layout
+        self.create_login_form()
+
+    def create_login_form(self):
         central_widget = QtWidgets.QWidget(self)
         self.setCentralWidget(central_widget)
 
@@ -32,7 +28,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         main_layout.addWidget(self.label_title)
 
         # Form layout
-        form_layout = QtWidgets.QFormLayout()
+        self.form_layout = QtWidgets.QFormLayout()
 
         # Username
         self.label_username = QtWidgets.QLabel("Username:", self)
@@ -40,7 +36,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         self.username = QtWidgets.QLineEdit(self)
         self.username.setPlaceholderText("Enter your username")
         self.username.setStyleSheet("padding: 5px; font-size: 14px;")
-        form_layout.addRow(self.label_username, self.username)
+        self.form_layout.addRow(self.label_username, self.username)
 
         # Password
         self.label_password = QtWidgets.QLabel("Password:", self)
@@ -58,20 +54,7 @@ class LoginWindow(QtWidgets.QMainWindow):
         self.show_password_button = QtWidgets.QPushButton(self)
         self.show_password_button.setCheckable(True)
         self.show_password_button.setFixedSize(30, 30)
-
-        # Attempt to load icons with error handling
-        try:
-            eye_icon = QtGui.QPixmap(gui_setup.image1_path).scaled(
-                30, 30, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
-            )
-            eye_off_icon = QtGui.QPixmap(gui_setup.image2_path).scaled(
-                30, 30, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
-            )
-            print("Icons loaded successfully.")  # Debug print
-        except Exception as e:
-            print(f"Error loading icons: {e}")
-
-        self.show_password_button.setIcon(QtGui.QIcon(eye_icon))  # Set the initial icon
+        self.show_password_button.setIcon(QtGui.QIcon("show_password.png"))
         self.show_password_button.setStyleSheet(
             """
             QPushButton {
@@ -86,9 +69,9 @@ class LoginWindow(QtWidgets.QMainWindow):
         self.show_password_button.clicked.connect(self.toggle_password_visibility)
         password_layout.addWidget(self.show_password_button)
 
-        form_layout.addRow(self.label_password, password_layout)
+        self.form_layout.addRow(self.label_password, password_layout)
 
-        main_layout.addLayout(form_layout)
+        main_layout.addLayout(self.form_layout)
 
         # Button layout
         button_layout = QtWidgets.QHBoxLayout()
@@ -114,11 +97,126 @@ class LoginWindow(QtWidgets.QMainWindow):
 
         main_layout.addLayout(button_layout)
 
+        # Create Account button
+        self.create_account_button = QtWidgets.QPushButton("Create an Account", self)
+        self.create_account_button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: #008CBA;
+                color: white;
+                font-size: 14px;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #005F6B;
+            }
+        """
+        )
+        self.create_account_button.clicked.connect(self.switch_to_create_account)
+        main_layout.addWidget(self.create_account_button)
+
         # Message label
         self.message_label = QtWidgets.QLabel("", self)
         self.message_label.setAlignment(QtCore.Qt.AlignCenter)
         self.message_label.setStyleSheet("font-size: 14px; color: red;")
         main_layout.addWidget(self.message_label)
+
+    def switch_to_create_account(self):
+        # Clear existing layout
+        layout = self.centralWidget().layout()
+        if layout:
+            for i in reversed(range(layout.count())):
+                widget = layout.itemAt(i).widget()
+                if widget:
+                    widget.deleteLater()
+
+        # Reset form for account creation
+        self.create_account_form()
+
+    def create_account_form(self):
+        main_layout = self.centralWidget().layout()
+
+        # Adjust title for account creation
+        self.label_title.setText("Create an Account")
+
+        # Clear login button and add create account button
+        main_layout.removeWidget(self.login_button)
+        self.login_button.deleteLater()
+
+        self.create_account_button.setText("Create Account")
+        self.create_account_button.clicked.disconnect(self.switch_to_create_account)
+        self.create_account_button.clicked.connect(self.create_account)
+
+        # Add fields for account creation (e.g., email, confirm password, etc.)
+        self.email_label = QtWidgets.QLabel("Email:", self)
+        self.email_label.setStyleSheet("font-size: 14px;")
+        self.email = QtWidgets.QLineEdit(self)
+        self.email.setPlaceholderText("Enter your email")
+        self.email.setStyleSheet("padding: 5px; font-size: 14px;")
+        self.form_layout.addRow(self.email_label, self.email)
+
+        self.confirm_password_label = QtWidgets.QLabel("Confirm Password:", self)
+        self.confirm_password_label.setStyleSheet("font-size: 14px;")
+        self.confirm_password = QtWidgets.QLineEdit(self)
+        self.confirm_password.setPlaceholderText("Confirm your password")
+        self.confirm_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.confirm_password.setStyleSheet("padding: 5px; font-size: 14px;")
+        self.form_layout.addRow(self.confirm_password_label, self.confirm_password)
+
+    def toggle_password_visibility(self):
+        if self.show_password_button.isChecked():
+            self.password.setEchoMode(QtWidgets.QLineEdit.Normal)
+            self.show_password_button.setIcon(QtGui.QIcon("hide_password.png"))
+        else:
+            self.password.setEchoMode(QtWidgets.QLineEdit.Password)
+            self.show_password_button.setIcon(QtGui.QIcon("show_password.png"))
+
+    def check_login(self):
+        username = self.username.text()
+        password = self.password.text()
+
+        # Implement your login logic here
+        # Example code to send login request to a server
+        url = "http://your-server/authenticate_user"
+        payload = {"username": username, "password": password}
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, json=payload, headers=headers)
+        response_data = response.json()
+
+        if response_data.get("authenticated"):
+            self.message_label.setText("Login successful")
+            self.message_label.setStyleSheet("font-size: 14px; color: green;")
+        else:
+            self.message_label.setText("Incorrect username or password")
+            self.message_label.setStyleSheet("font-size: 14px; color: red;")
+
+    def create_account(self):
+        username = self.username.text()
+        password = self.password.text()
+        email = self.email.text()
+        confirm_password = self.confirm_password.text()
+
+        # Implement your account creation logic here
+        # Example code to send account creation request to a server
+        url = "http://your-server/create_user"
+        payload = {
+            "username": username,
+            "password": password,
+            "email": email,
+            "confirm_password": confirm_password,
+        }
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url, json=payload, headers=headers)
+        response_data = response.json()
+
+        if response_data.get("created"):
+            self.message_label.setText("Account created successfully")
+            self.message_label.setStyleSheet("font-size: 14px; color: green;")
+        else:
+            self.message_label.setText("Failed to create account")
+            self.message_label.setStyleSheet("font-size: 14px; color: red;")
+
 
     def center(self):
         frameGm = self.frameGeometry()
@@ -128,48 +226,6 @@ class LoginWindow(QtWidgets.QMainWindow):
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
-
-    def toggle_password_visibility(self):
-        if self.show_password_button.isChecked():
-            self.password.setEchoMode(QtWidgets.QLineEdit.Normal)
-            try:
-                eye_off_icon = QtGui.QPixmap(gui_setup.image2_path).scaled(
-                    270, 340, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
-                )
-                self.show_password_button.setIcon(
-                    QtGui.QIcon(eye_off_icon)
-                )  # Change icon to eye-off
-            except FileNotFoundError:
-                print(
-                    "Error: Image file not found. Make sure hide_password.png is in the correct directory."
-                )
-        else:
-            self.password.setEchoMode(QtWidgets.QLineEdit.Password)
-            try:
-                eye_icon = QtGui.QPixmap(gui_setup.image1_path).scaled(
-                    270, 340, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation
-                )
-                self.show_password_button.setIcon(
-                    QtGui.QIcon(eye_icon)
-                )  # Change icon to eye
-            except FileNotFoundError:
-                print(
-                    "Error: Image file not found. Make sure show_password.png is in the correct directory."
-                )
-
-    def check_login(self):
-        username = self.username.text()
-        password = self.password.text()
-        url = "http://25.15.71.9:5000/authenticate_user"
-        payload = {"username": username, "password": password}
-        headers = {"Content-Type": "application/json"}
-        response = requests.request("POST", url, json=payload, headers=headers)
-        login_status = json.loads(response.text)
-        login_status = login_status.get("message")
-        if login_status == "Authentication successful":
-            self.message_label.setText("Login successful")
-        else:
-            self.message_label.setText("Incorrect username or password")
 
 
 def main():
