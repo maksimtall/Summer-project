@@ -214,10 +214,51 @@ class LoginWindow(QtWidgets.QMainWindow):
         main_layout = QtWidgets.QVBoxLayout(central_widget)
 
         # Add new content here for the main application window after successful login
-        self.label_title = QtWidgets.QLabel("Main Application Window", self)
+        self.label_title = QtWidgets.QLabel("Main Dashboard", self)
         self.label_title.setAlignment(QtCore.Qt.AlignCenter)
         self.label_title.setStyleSheet("font-size: 20px; font-weight: bold;")
         main_layout.addWidget(self.label_title)
+
+        self.add_dashboard_buttons(main_layout)
+
+    def add_dashboard_buttons(self, layout):
+        # Messaging Section
+        self.add_dashboard_section(layout, "Messaging", "Send and receive messages.", "#4CAF50")
+
+        # Projects Section
+        self.add_dashboard_section(layout, "Projects", "Manage your projects.", "#2196F3")
+
+        # Tasks Section
+        self.add_dashboard_section(layout, "Tasks", "Track your tasks.", "#FFC107")
+
+        # Templates Section
+        self.add_dashboard_section(layout, "Templates", "Use and manage templates.", "#9C27B0")
+
+    def add_dashboard_section(self, layout, title, description, color):
+        section_widget = QtWidgets.QWidget(self)
+        section_layout = QtWidgets.QVBoxLayout(section_widget)
+        
+        button = QtWidgets.QPushButton(title, self)
+        button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {color};
+                color: white;
+                font-size: 16px;
+                padding: 10px;
+                border-radius: 5px;
+            }}
+            QPushButton:hover {{
+                background-color: {color};
+                opacity: 0.8;
+            }}
+        """)
+        section_layout.addWidget(button)
+
+        label = QtWidgets.QLabel(description, self)
+        label.setStyleSheet("font-size: 14px;")
+        section_layout.addWidget(label)
+
+        layout.addWidget(section_widget)
 
     def create_account(self):
         username = self.username.text()
@@ -252,12 +293,17 @@ class LoginWindow(QtWidgets.QMainWindow):
 class LoadingScreen(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Loading...")
-        self.setGeometry(100, 100, 400, 250)  # Set appropriate size for loading screen
-        self.center()
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Loading")
+        self.setGeometry(100, 100, 300, 100)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        self.setStyleSheet("background-color: white; border: 2px solid #4CAF50; border-radius: 10px;")
 
         layout = QtWidgets.QVBoxLayout(self)
-        self.label = QtWidgets.QLabel("Loading, please wait.", self)
+
+        self.label = QtWidgets.QLabel("Loading, please wait", self)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setStyleSheet("font-size: 16px;")
         layout.addWidget(self.label)
@@ -265,7 +311,7 @@ class LoadingScreen(QtWidgets.QWidget):
         self.dots = ""
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_loading_text)
-        self.timer.start(100)
+        self.timer.start(1000)
 
         # Center the loading screen
         self.center()
